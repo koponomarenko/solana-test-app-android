@@ -32,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.solana.mobilewalletadapter.clientlib.*
 
 
 class MainActivity : ComponentActivity() {
@@ -66,6 +67,8 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
                 .padding(10.dp), // should expand horizontally and have padding
             onClick = {
                 coroutineScope.launch {
+//                    callTest()
+
                     val rpcUriStr: String = "https://api.devnet.solana.com"
                     val rpcUri = rpcUriStr.toUri()
                     result = RecentBlockhashUseCase(rpcUri = rpcUri).toString()
@@ -94,10 +97,16 @@ fun GreetingPreview() {
     }
 }
 
-//fun callRecentBlockhashUseCase() {
-//    CoroutineScope(Dispatchers.Main).launch {
-//        val rpcUriStr: String = "https://api.devnet.solana.com"
-//        val rpcUri = rpcUriStr.toUri()
-//        val blockhash = RecentBlockhashUseCase(rpcUri)
-//    }
-//}
+fun callTest() {
+// Define dApp's identity metadata
+    val solanaUri = Uri.parse("https://yourdapp.com")
+    val iconUri = Uri.parse("favicon.ico") // resolves to https://yourdapp.com/favicon.ico
+    val identityName = "Solana Kotlin Transfer Example"
+
+// Construct the client
+    val walletAdapter = MobileWalletAdapter(connectionIdentity = ConnectionIdentity(
+        identityUri = solanaUri,
+        iconUri = iconUri,
+        identityName = identityName
+    ))
+}
