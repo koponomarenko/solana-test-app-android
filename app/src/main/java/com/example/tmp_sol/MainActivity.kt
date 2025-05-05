@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -65,26 +66,25 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     val coroutineScope = rememberCoroutineScope()
-    var result by remember { mutableStateOf("Not yet called") }
+    var recentBlockhashResult by remember { mutableStateOf("Not yet called") }
     Column(
         modifier = modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "$name",
+            text = name,
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 12.dp)
         )
+        //========= Get Recent Blockhash ===============================================
         Button(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 2.dp),
             onClick = {
                 coroutineScope.launch {
-                    val rpcUriStr: String = "https://api.devnet.solana.com"
-                    val rpcUri = rpcUriStr.toUri()
-                    result = RecentBlockhashUseCase(rpcUri = rpcUri).toString()
-                    Log.i("callRecentBlockhashUseCase", "result=$result")
+                    val rpcUri = "https://api.devnet.solana.com".toUri()
+                    recentBlockhashResult = RecentBlockhashUseCase(rpcUri = rpcUri).toString()
                 }
             }
         ) {
@@ -94,7 +94,50 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             )
         }
         Text(
-            text = result,
+            text = recentBlockhashResult,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .padding(16.dp),
+            textAlign = TextAlign.Center
+        )
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 8.dp),
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant
+        )
+        //========= Send SOL Transactions ===============================================
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 2.dp),
+            onClick = {
+                coroutineScope.launch {
+                    val rpcUri = "https://api.devnet.solana.com".toUri()
+                    // TODO: return result?
+                    SendTransactionsUseCase(
+                        rpcUri = rpcUri,
+                        transactions = listOf(byteArrayOf(1))
+                    ).toString()
+                }
+            }
+        ) {
+            Text(
+                text = "Send SOL Transactions",
+                fontWeight = FontWeight.Bold,
+            )
+        }
+        Text(
+            text = "TODO: set result",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
