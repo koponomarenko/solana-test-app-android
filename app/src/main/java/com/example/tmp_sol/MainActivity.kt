@@ -1,16 +1,24 @@
 package com.example.tmp_sol
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,6 +40,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
 import com.solana.mobilewalletadapter.clientlib.*
 
 
@@ -43,7 +53,7 @@ class MainActivity : ComponentActivity() {
             TmpsolTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Android",
+                        name = "Solana test app",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -54,21 +64,23 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
-    //val result by remember { mutableStateOf(callRecentBlockhashUseCase()) }
     val coroutineScope = rememberCoroutineScope()
     var result by remember { mutableStateOf("Not yet called") }
-    Column {
+    Column(
+        modifier = modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
-            text = "Hello $name!",
-            modifier = modifier
+            text = "$name",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 12.dp)
         )
         Button(
-            modifier = Modifier.fillMaxWidth()
-                .padding(10.dp), // should expand horizontally and have padding
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 2.dp),
             onClick = {
                 coroutineScope.launch {
-//                    callTest()
-
                     val rpcUriStr: String = "https://api.devnet.solana.com"
                     val rpcUri = rpcUriStr.toUri()
                     result = RecentBlockhashUseCase(rpcUri = rpcUri).toString()
@@ -77,14 +89,26 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             }
         ) {
             Text(
-                text = "callRecentBlockhashUseCase",
+                text = "Get Recent Blockhash",
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.headlineMedium
             )
         }
         Text(
             text = result,
-            modifier = modifier
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .padding(16.dp),
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -95,18 +119,4 @@ fun GreetingPreview() {
     TmpsolTheme {
         Greeting("Android")
     }
-}
-
-fun callTest() {
-// Define dApp's identity metadata
-    val solanaUri = Uri.parse("https://yourdapp.com")
-    val iconUri = Uri.parse("favicon.ico") // resolves to https://yourdapp.com/favicon.ico
-    val identityName = "Solana Kotlin Transfer Example"
-
-// Construct the client
-    val walletAdapter = MobileWalletAdapter(connectionIdentity = ConnectionIdentity(
-        identityUri = solanaUri,
-        iconUri = iconUri,
-        identityName = identityName
-    ))
 }
