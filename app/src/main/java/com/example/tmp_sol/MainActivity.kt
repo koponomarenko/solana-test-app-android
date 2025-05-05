@@ -82,10 +82,10 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.headlineMedium
             )
         }
-//        Text(
-//            text = result,
-//            modifier = modifier
-//        )
+        Text(
+            text = result,
+            modifier = modifier
+        )
     }
 }
 
