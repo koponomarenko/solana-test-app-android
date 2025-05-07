@@ -43,7 +43,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
+import com.funkatronics.encoders.Base58
 import com.solana.mobilewalletadapter.clientlib.*
+import com.solana.networking.Rpc20Driver
+import com.solana.publickey.SolanaPublicKey
+import com.solana.rpccore.JsonRpc20Request
+import com.solana.signer.Ed25519Signer
+import com.solana.transaction.AccountMeta
+import com.solana.transaction.Blockhash
+import com.solana.transaction.Message
+import com.solana.transaction.Transaction
+import com.solana.transaction.TransactionInstruction
+import diglol.crypto.Ed25519
+import diglol.crypto.KeyPair
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonArray
 
 
 class MainActivity : ComponentActivity() {
@@ -67,6 +82,9 @@ class MainActivity : ComponentActivity() {
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     val coroutineScope = rememberCoroutineScope()
     var recentBlockhashResult by remember { mutableStateOf("Not yet called") }
+    var sendTransactionRequestResult by remember { mutableStateOf("Not yet called") }
+    val rpcUri = "https://api.devnet.solana.com".toUri()
+
     Column(
         modifier = modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -83,7 +101,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
                 .padding(vertical = 2.dp),
             onClick = {
                 coroutineScope.launch {
-                    val rpcUri = "https://api.devnet.solana.com".toUri()
                     recentBlockhashResult = RecentBlockhashUseCase(rpcUri = rpcUri).toString()
                 }
             }
@@ -123,21 +140,29 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             onClick = {
                 coroutineScope.launch {
                     val rpcUri = "https://api.devnet.solana.com".toUri()
-                    // TODO: return result?
-                    SendTransactionsUseCase(
-                        rpcUri = rpcUri,
-                        transactions = listOf(byteArrayOf(1))
-                    ).toString()
+                    try {
+                        // Pass a lambda that updates the state
+                        prepTransaction(coroutineScope) { result ->
+                            sendTransactionRequestResult = result
+                        }
+                    } catch (e: Exception) {
+                        sendTransactionRequestResult = "Error: ${e.message}"
+                    }
+
+//                    SendTransactionsUseCase(
+//                        rpcUri = rpcUri,
+//                        transactions = listOf(byteArrayOf(1))
+//                    ).toString()
                 }
             }
         ) {
             Text(
-                text = "Send SOL Transactions",
+                text = "Send SOL Transaction",
                 fontWeight = FontWeight.Bold,
             )
         }
         Text(
-            text = "TODO: set result",
+            text = sendTransactionRequestResult,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
@@ -163,3 +188,94 @@ fun GreetingPreview() {
         Greeting("Android")
     }
 }
+
+suspend fun prepTransaction(
+    coroutineScope: CoroutineScope,
+    onTransactionComplete: (String) -> Unit
+) {
+// Solana Memo Program
+    val memoProgramId = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr" // TODO
+    val memoProgramIdKey = SolanaPublicKey.from(memoProgramId)
+
+    val address = SolanaPublicKey.from("H56PNhvLFohe3kVsWu4HQtseFYRGyfQ1yioVjhzmN9Bo")
+
+// Construct the instruction
+    val message = "Hello Solana!"
+    val memoInstruction = TransactionInstruction(
+        memoProgramIdKey,
+        // Define the accounts in instruction
+        listOf(AccountMeta(address, true, true)),
+        // Pass in the instruction data as ByteArray
+        message.encodeToByteArray()
+    )
+
+/// Create the Memo transaction
+
+    // Build Message
+    val rpcUri = "https://api.devnet.solana.com".toUri()
+
+//    coroutineScope.launch {
+    val recentBlockhashResult = RecentBlockhashUseCase(rpcUri = rpcUri)
+
+    //val blockhash = Blockhash(RecentBlockhashUseCase(rpcUri = rpcUri))
+    val solMessage = Message.Builder()
+        .addInstruction(memoInstruction)
+        .setRecentBlockhash(recentBlockhashResult)
+        .build()
+//    }
+
+    // prepare signer
+    val publicKey = "H56PNhvLFohe3kVsWu4HQtseFYRGyfQ1yioVjhzmN9Bo"
+    val privateKey =
+        "3h2U43gek9SQUfN1izTWXv7Gp7LzCUUFmBdXJFwzxGZmpS5nb4pJFge6umcvEGMBYFQHr6vYRitCLbToaWcCF7uT"
+    val keyPair = KeyPair(publicKey.toByteArray(), privateKey.toByteArray())
+
+    //val keyPair = Ed25519.generateKeyPair()
+    val signer = object : Ed25519Signer() {
+        override val publicKey: ByteArray get() = keyPair.publicKey
+        override suspend fun signPayload(payload: ByteArray): ByteArray =
+            Ed25519.sign(keyPair, payload)
+    }
+
+// Sign Message
+    val signature = signer.signPayload(solMessage.serialize())
+
+// Build Transaction
+    val transaction = Transaction(listOf(signature), solMessage)
+////////////==================================
+
+    // serialize transaction
+    val transactionBytes = transaction.serialize()
+    val encodedTransaction = Base58.encodeToString(transactionBytes)
+
+// setup RPC driver
+    val rpcDriver = Rpc20Driver(rpcUri.toString(), KtorHttpDriver())
+
+    class SendTransactionRequest(encodedTransaction: String, requestId: String) : JsonRpc20Request(
+        method = "sendTransaction",
+        params = buildJsonArray {
+            add(
+                JsonPrimitive
+                    (encodedTransaction)
+            )
+        },
+        requestId
+    )
+
+// build rpc request
+    val requestId = 1
+    val rpcRequest = SendTransactionRequest(encodedTransaction, requestId.toString())
+
+// send the request and get response
+// using JsonElement.serializer() will return the JSON RPC response. you can use your own serializer to get back a specific object
+    val rpcResponse = rpcDriver.makeRequest(rpcRequest, JsonElement.serializer())
+
+    val result = rpcResponse.toString()
+    onTransactionComplete(result)
+
+    //Log.w("DDDD", "rpcResponse: ${rpcResponse.result.toString()}")
+    Log.w("DDDD", "rpcResponse ... .")
+
+    //SendTransactionsUseCase(rpcUri = rpcUri, transactions = listOf(transaction.serialize()))
+}
+

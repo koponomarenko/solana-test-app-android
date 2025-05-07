@@ -47,6 +47,8 @@ dependencies {
     implementation("com.solanamobile:rpc-core:0.2.7")
     implementation("io.github.funkatronics:multimult:0.2.3")
 
+    implementation("com.diglol.crypto:crypto:0.2.0")
+
     implementation("io.ktor:ktor-client-core:2.3.4")
     implementation("io.ktor:ktor-client-android:2.3.4")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0-RC")
