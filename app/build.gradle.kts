@@ -48,6 +48,7 @@ dependencies {
     implementation("io.github.funkatronics:multimult:0.2.3")
 
     implementation("com.diglol.crypto:crypto:0.2.0")
+    implementation("org.sol4k:sol4k:0.5.13")
 
     implementation("io.ktor:ktor-client-core:2.3.4")
     implementation("io.ktor:ktor-client-android:2.3.4")
