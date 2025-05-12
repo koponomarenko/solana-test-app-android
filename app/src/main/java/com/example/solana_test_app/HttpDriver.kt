@@ -1,4 +1,4 @@
-package com.example.tmp_sol
+package com.example.solana_test_app
 
 import com.solana.networking.HttpNetworkDriver
 import com.solana.networking.HttpRequest

@@ -1,4 +1,4 @@
-package com.example.tmp_sol
+package com.example.solana_test_app
 
 import android.os.Bundle
 import android.util.Log
@@ -26,7 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.example.tmp_sol.ui.theme.TmpsolTheme
+import com.example.solana_test_app.ui.theme.SolanaTestAppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,10 +50,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TmpsolTheme {
+            SolanaTestAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Solana test app",
+                    SolanaTestApp(
+                        name = "Solana Test App",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -62,8 +62,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
+fun SolanaTestAppPreview() {
+    SolanaTestAppTheme {
+        SolanaTestApp("Solana Test App")
+    }
+}
+
+@Composable
+fun SolanaTestApp(name: String, modifier: Modifier = Modifier) {
     val coroutineScope = rememberCoroutineScope( )
     var recentBlockhashResult by remember { mutableStateOf("Not yet called") }
     var sendTransactionRequestResult by remember { mutableStateOf(buildAnnotatedString { append("Not yet called") }) }
@@ -123,7 +131,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
                 .padding(vertical = 2.dp),
             onClick = {
                 coroutineScope.launch {
-                    val rpcUri = "https://api.devnet.solana.com".toUri()
                     try {
                         // Pass a lambda that updates the state
                         prepTransaction(coroutineScope) { annotatedResult ->
@@ -133,6 +140,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
                         sendTransactionRequestResult = buildAnnotatedString { append("Error: ${e.message}") }
                     }
 
+//                    val rpcUri = "https://api.devnet.solana.com".toUri()
 //                    SendTransactionsUseCase(
 //                        rpcUri = rpcUri,
 //                        transactions = listOf(byteArrayOf(1))
@@ -165,14 +173,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    TmpsolTheme {
-        Greeting("Android")
-    }
-}
-
 fun prepTransaction(
     coroutineScope: CoroutineScope,
     onTransactionComplete: (AnnotatedString) -> Unit
@@ -183,7 +183,7 @@ fun prepTransaction(
 
             val sender = Keypair.fromSecretKey(Base58.decode("3h2U43gek9SQUfN1izTWXv7Gp7LzCUUFmBdXJFwzxGZmpS5nb4pJFge6umcvEGMBYFQHr6vYRitCLbToaWcCF7uT"))
             var dusdcToken = PublicKey("6jmx3aN9GHx7dSGp6iEW2CmKEFxBnmjFPKT8yRuuHQyT")
-            // receiverAccount = "CCuSfDjoNXjcyRQ2AivHudqLTSa5rFeVoxnLSiszRo4v"
+            // recei1verAccount = "CCuSfDjoNXjcyRQ2AivHudqLTSa5rFeVoxnLSiszRo4v"
             var receiverAssociatedAccount = PublicKey("96mewfAN9mqVP65KRUYfai8QxU8mTXtYQwnoPwTi3RQH")
             var holderAssociatedAccount = PublicKey.findProgramDerivedAddress(sender.publicKey, dusdcToken);
 

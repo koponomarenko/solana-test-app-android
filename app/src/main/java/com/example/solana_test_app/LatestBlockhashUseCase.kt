@@ -1,8 +1,7 @@
-package com.example.tmp_sol
+package com.example.solana_test_app
 
 import android.net.Uri
 import android.util.Log
-import com.example.tmp_sol.KtorHttpDriver
 import com.solana.networking.Rpc20Driver
 import com.solana.rpccore.JsonRpc20Request
 import com.solana.transaction.Blockhash

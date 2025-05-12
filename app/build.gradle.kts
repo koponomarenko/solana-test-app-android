@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.tmp_sol"
+    namespace = "com.example.solana_test_app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.tmp_sol"
+        applicationId = "com.example.solana_test_app"
         minSdk = 29
         targetSdk = 35
         versionCode = 1

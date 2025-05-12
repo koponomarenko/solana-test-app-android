@@ -1,4 +1,4 @@
-package com.example.tmp_sol
+package com.example.solana_test_app
 
 import org.junit.Test
 

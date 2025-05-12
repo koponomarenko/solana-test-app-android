@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "tmp-sol"
+rootProject.name = "solana-test-app"
 include(":app")
  
