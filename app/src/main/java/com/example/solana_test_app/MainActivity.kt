@@ -72,7 +72,7 @@ fun SolanaTestAppPreview() {
 
 @Composable
 fun SolanaTestApp(name: String, modifier: Modifier = Modifier) {
-    val coroutineScope = rememberCoroutineScope( )
+    val coroutineScope = rememberCoroutineScope()
     var recentBlockhashResult by remember { mutableStateOf("Not yet called") }
     var sendTransactionRequestResult by remember { mutableStateOf(buildAnnotatedString { append("Not yet called") }) }
     val rpcUri = "https://api.devnet.solana.com".toUri()
@@ -137,7 +137,8 @@ fun SolanaTestApp(name: String, modifier: Modifier = Modifier) {
                             sendTransactionRequestResult = annotatedResult
                         }
                     } catch (e: Exception) {
-                        sendTransactionRequestResult = buildAnnotatedString { append("Error: ${e.message}") }
+                        sendTransactionRequestResult =
+                            buildAnnotatedString { append("Error: ${e.message}") }
                     }
 
 //                    val rpcUri = "https://api.devnet.solana.com".toUri()
@@ -181,11 +182,14 @@ fun prepTransaction(
         try {
             val connection = Connection("https://api.devnet.solana.com")
 
-            val sender = Keypair.fromSecretKey(Base58.decode("3h2U43gek9SQUfN1izTWXv7Gp7LzCUUFmBdXJFwzxGZmpS5nb4pJFge6umcvEGMBYFQHr6vYRitCLbToaWcCF7uT"))
+            val sender =
+                Keypair.fromSecretKey(Base58.decode("3h2U43gek9SQUfN1izTWXv7Gp7LzCUUFmBdXJFwzxGZmpS5nb4pJFge6umcvEGMBYFQHr6vYRitCLbToaWcCF7uT"))
             var dusdcToken = PublicKey("6jmx3aN9GHx7dSGp6iEW2CmKEFxBnmjFPKT8yRuuHQyT")
             // recei1verAccount = "CCuSfDjoNXjcyRQ2AivHudqLTSa5rFeVoxnLSiszRo4v"
-            var receiverAssociatedAccount = PublicKey("96mewfAN9mqVP65KRUYfai8QxU8mTXtYQwnoPwTi3RQH")
-            var holderAssociatedAccount = PublicKey.findProgramDerivedAddress(sender.publicKey, dusdcToken);
+            var receiverAssociatedAccount =
+                PublicKey("96mewfAN9mqVP65KRUYfai8QxU8mTXtYQwnoPwTi3RQH")
+            var holderAssociatedAccount =
+                PublicKey.findProgramDerivedAddress(sender.publicKey, dusdcToken);
 
             // build SOL instruction
             var splTransferInstruction = SplTransferInstruction(
