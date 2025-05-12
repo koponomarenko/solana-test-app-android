@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.example.tmp_sol.ui.theme.TmpsolTheme
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -65,7 +64,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
-    val coroutineScope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope( )
     var recentBlockhashResult by remember { mutableStateOf("Not yet called") }
     var sendTransactionRequestResult by remember { mutableStateOf(buildAnnotatedString { append("Not yet called") }) }
     val rpcUri = "https://api.devnet.solana.com".toUri()
@@ -181,23 +180,27 @@ fun prepTransaction(
     coroutineScope.launch(kotlinx.coroutines.Dispatchers.IO) {
         try {
             val connection = Connection("https://api.devnet.solana.com")
-            val blockhash = connection.getLatestBlockhash()
+
             val sender = Keypair.fromSecretKey(Base58.decode("3h2U43gek9SQUfN1izTWXv7Gp7LzCUUFmBdXJFwzxGZmpS5nb4pJFge6umcvEGMBYFQHr6vYRitCLbToaWcCF7uT"))
-            var dusdc = PublicKey("6jmx3aN9GHx7dSGp6iEW2CmKEFxBnmjFPKT8yRuuHQyT")
+            var dusdcToken = PublicKey("6jmx3aN9GHx7dSGp6iEW2CmKEFxBnmjFPKT8yRuuHQyT")
             // receiverAccount = "CCuSfDjoNXjcyRQ2AivHudqLTSa5rFeVoxnLSiszRo4v"
             var receiverAssociatedAccount = PublicKey("96mewfAN9mqVP65KRUYfai8QxU8mTXtYQwnoPwTi3RQH")
-            var holderAssociatedAccount = PublicKey.findProgramDerivedAddress(sender.publicKey, dusdc);
+            var holderAssociatedAccount = PublicKey.findProgramDerivedAddress(sender.publicKey, dusdcToken);
+
+            // build SOL instruction
             var splTransferInstruction = SplTransferInstruction(
                 holderAssociatedAccount.publicKey,
                 receiverAssociatedAccount,
-                dusdc,
+                dusdcToken,
                 sender.publicKey,
-                100,
+                100, // 0.000100
                 6
             )
+
+            // create message
             var message = TransactionMessage.newMessage(
                 sender.publicKey,
-                blockhash,
+                connection.getLatestBlockhash(),
                 splTransferInstruction
             )
             var transaction = VersionedTransaction(message)
@@ -205,8 +208,7 @@ fun prepTransaction(
 
             var signature = connection.sendTransaction(transaction)
 
-            println("Transaction Signature:$signature")
-            Log.w("DDDD", "rpcResponse ... .")
+            Log.w("DDDD", "Transaction Signature: $signature")
             val resultText = buildAnnotatedString {
                 append("Transaction Signature: ")
                 pushLink(LinkAnnotation.Url("http://solscan.io/tx/$signature?cluster=devnet"))
